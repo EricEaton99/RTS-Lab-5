@@ -7,6 +7,15 @@ GPIO.setmode(GPIO.BOARD)
 GPIO.setwarnings(False)
 
 class RobotController:
+    servos = [23, 24]
+
+    right_turn_speed = 1700
+    left_turn_speed = 1300
+    forward_speed = 2000
+    stop_speed = 1500
+
+    forward_time = 2
+
     def __init__(self):
         self.servos = [23, 24]
         self.raspi = pigpio.pi()
@@ -29,11 +38,12 @@ class RobotController:
 
     def robot_right(self, speed):
         self.raspi.set_servo_pulsewidth(self.servos[0], speed)
-        self.raspi.set_servo_pulsewidth(self.servos[1], self.reverse_motor_pwm(speed))
+        self.raspi.set_servo_pulsewidth(self.servos[1], speed)
+        print(f"turning at {speed}, {self.reverse_motor_pwm(speed)}")
 
     def robot_left(self, speed):
         self.raspi.set_servo_pulsewidth(self.servos[0], self.reverse_motor_pwm(speed))
-        self.raspi.set_servo_pulsewidth(self.servos[1], speed)
+        self.raspi.set_servo_pulsewidth(self.servos[1], self.reverse_motor_pwm(speed))
 
     def send_instruction(self, instruction):
         with self.instruction_lock:

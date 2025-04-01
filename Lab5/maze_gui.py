@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import time
 
 class MazeGUI:
     def __init__(self, maze_grid, path=None):
@@ -9,10 +8,6 @@ class MazeGUI:
         self.robot_position = None  # (row, col)
         self.path = path  # List of (row, col) tuples for the path
         self.obstacle_positions = []  # List of (row, col) where obstacles are detected
-        self.key_callbacks = {}  # Dictionary to store key-callback pairs
-        self.running = True
-        self.thread = threading.Thread(target=self._listen_for_keys)
-        self.thread.start()
 
     def draw_maze(self):
         self.ax.clear()
@@ -58,26 +53,30 @@ class MazeGUI:
         self.ax.set_xticks([])
         self.ax.set_yticks([])
         plt.tight_layout()
-        plt.pause(0.1)  # Allows for real-time updates
-
+    
     def update_robot_position(self, new_position):
         self.robot_position = new_position
-        self.path.append(new_position)
+        path.append(new_position)
         self.draw_maze()
     
-    def detect_obstacle(self, direction):
+    def detect_obstacle(self): #direction
+        
         if not self.robot_position:
             return
         r, c = self.robot_position
         
-        if direction == "south":
-            obstacle_pos = (r + 1, c)
-        elif direction == "north":
-            obstacle_pos = (r - 1, c)
-        elif direction == "west":
-            obstacle_pos = (r, c - 1)
-        elif direction == "east":
-            obstacle_pos = (r, c + 1)
+        # if direction == "s":
+        #     obstacle_pos = (r + 1, c)
+            
+        # elif direction == "n":
+        #     obstacle_pos = (r - 1,c)
+            
+        # elif direction == "w":
+        #     obstacle_pos= (r, c-1)
+        
+        # elif direction == "e":
+        #     obstacle_pos = (r, c+1)
+        obstacle_pos = [1, 3]
        
         # Ensure obstacle position is within maze boundaries
         if 0 <= obstacle_pos[0] < self.maze_grid.shape[0] and 0 <= obstacle_pos[1] < self.maze_grid.shape[1]:
@@ -85,55 +84,38 @@ class MazeGUI:
         
         self.draw_maze()
     
-    def animate_movement(self, movement_path, delay=0.5):
-        for pos in movement_path:
-            self.update_robot_position(pos)
-            time.sleep(delay)  # Pause before moving to the next position
-
     def show(self):
         self.draw_maze()
         plt.show()
-    
-    def stop(self):
-        self.running = False
-        self.robot_stop()
-        self.raspi.stop()
-        self.thread.join()
 
-# Create maze layout
+# Create maze layout based on your image
+# 0 = empty, 1 = wall, 2 = start, 3 = finish
+corners = [
+    [1,6],[1,1],[4,1], [4,4],[6,4]
+]
+
 maze = [
-    [0, 0, 0, 0, 0, 2],
-    [0, 1, 1, 1, 0, 0],
-    [0, 0, 0, 1, 0, 0],
-    [1, 1, 0, 1, 0, 0],
-    [1, 1, 0, 1, 0, 0],
-    [1, 1, 0, 1, 0, 0],
-    [1, 1, 0, 0, 0, 0],
-    [0, 0, 0, 1, 1, 0],
-    [0, 1, 0, 0, 0, 0],
-    [0, 1, 1, 0, 0, 0],
-    [0, 0, 0, 0, 1, 0],
-    [3, 0, 0, 0, 0, 0]
+    [1, 1, 1, 1, 1, 1, 1,1],
+    [1, 0, 0, 0, 0, 0, 0,1],
+    [1, 0, 0, 0, 0, 0, 0,1],
+    [1, 0, 0, 1, 1, 1, 0,1],
+    [1, 0, 0, 0, 0, 1, 2,1],
+    [1, 1, 1, 1, 0, 1, 0,1],
+    [3, 0, 0, 0, 0, 1, 0,1],
+    [1, 1, 1, 1, 1, 1, 0,1]
 ]
 
-# Define the path the robot will follow
+# Define the path shown by dashed lines in the image
+path = [
+]
+
 full_path = [
-    (0, 4), (0, 3), (0, 2), (0, 1), (0, 0), (1, 0), (2, 0), (2, 1), (2, 2), (3, 2),
-    (4, 2), (5, 2), (6, 2), (6, 3), (6, 4), (5, 4), (4, 4), (3, 4), (2, 4), (1, 4), (1, 5),
-    (2, 5), (3, 5), (4, 5), (5, 5), (6, 5), (7, 5), (8, 5), (8, 4), (8, 3), (8, 2), (7, 2),
-    (7, 1), (7, 0), (8, 0), (9, 0), (10, 0), (10, 1), (10, 2), (10, 3), (9, 3), (9, 4),
-    (9, 5), (10, 5), (11, 5), (11, 4), (11, 3), (11, 2), (11, 1)
+    (7,6),(6,6),(5,6),(4,6),(3,6),(2,6),(1,6),(1,5),(1,4),(1,3),(1,2),(1,1),(2,1),(3,1),(4,1),(4,2),(4,3),(4,4),(5,4),(6,4),(6,3),(6,2),(6,1),
+    (6,4)
 ]
 
 
-
-
-if __name__ == "__main__":
-    # Create the maze GUI
-    gui = MazeGUI(maze, [])
-
-    # Animate robot movement
-    gui.animate_movement(full_path, delay=0.3)
-
-    # Show the final state
-    gui.show()
+        
+# Create and show the maze
+gui = MazeGUI(maze, path)
+gui.show()

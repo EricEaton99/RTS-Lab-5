@@ -71,21 +71,64 @@ DEFAULT_PATH = [
     # ['s', [5,1], 7, -1, 'r'],
 ]
 
-# def new_direction(direction):
-#     mapy = 
+
+
+def update_direction(direction, turn):
+    mapy = {}
+    mapy['e'] = 0
+    mapy['n'] = 1
+    mapy['w'] = 2
+    mapy['s'] = 3
+
+    dmappy = {}
+    dmappy['f'] = 1
+    dmappy['l'] = 1
+    dmappy['r'] = -1
+
+    unmappy = ['e','n','w','s']
+
+    new_direction = mapy[direction] + dmappy[turn]
+    new_direction %= 3
+
+    return unmappy[new_direction]
+
+def update_pose(start_pose, direction, distance):
+    mapy = {}
+    mapy['n'] = [0,1]
+    mapy['s'] = [0,-1]
+    mapy['w'] = [-1,0]
+    mapy['e'] = [1,0]
+
+    d_pose = mapy[direction]
+    dif_pose = d_pose * distance
+    return [start_pose[0] + dif_pose[0], start_pose[1] + dif_pose[1]]
+
+
+
+START_POSE = ['w', [5,0], 5, 0, 'f', "forward"]
+
+def update_start_pose(pose):
+    START_POSE[1] = update_pose(START_POSE[1], START_POSE[0], pose[1])
+    START_POSE[0] = update_direction( START_POSE[0], pose[0])
+    START_POSE[2] = pose[1]
+    START_POSE[3] = 0
+    START_POSE[4] = 'f'
+    START_POSE[5] = pose[0]
+
+    print(START_POSE)
+
+
+
 
 
 # Example usage
 if __name__ == "__main__":
-    # pose_defined = ['w', [5,0], 5, 0, 'f'],
-
-
-
     navCtrl = NavController(DEFAULT_PATH)
-    print(navCtrl.get_pose())
+    pose = navCtrl.get_pose()
+
+    print(START_POSE)
+
     while navCtrl.turn():
-        pose = navCtrl.get_pose()
-        # pose_defined = ['w', [5,0], 5, 0, 'f'],
-        print(navCtrl.get_pose())
+        update_start_pose(pose)
 
     

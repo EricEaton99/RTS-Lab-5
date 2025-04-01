@@ -13,6 +13,7 @@ class Ultrasonic:
 
         self.sensor = HCSR04(7, 12)
         self.running = True
+        self.unpaused = True
         self.thread = threading.Thread(target=self._execute_instructions)
         self.thread.start()
 
@@ -20,6 +21,10 @@ class Ultrasonic:
         self.running = False
         self.thread.join()
 
+    def pause(self):
+        self.unpaused = False
+    def unpause(self):
+        self.unpaused = True
 
     def register_callback(self, distance, callback):
         """
@@ -28,20 +33,27 @@ class Ultrasonic:
         self.threshold_callbacks.append((distance, callback))
 
     def _execute_instructions(self):
-        while self.running:
+        while self.running and self.unpaused:
             self._measure_helper()
             time.sleep(self.readPeriod)  # Small delay to prevent busy-waiting
             
     
     def get_distance(self):
-        self._measure_helper()
+        return self.sensor.measure(self.numMeasures, "cm")
 
     def _measure_helper(self):
         distance = self.sensor.measure(self.numMeasures, "cm")
+        # callbacks_to_remove = []  # Store callbacks that need to be removed
+        
         for threshold, callback in self.threshold_callbacks:
             if distance < threshold:
-                # print(f"{distance} cm")
-                callback()  # Call the registered callback if distance is less than threshold
+                callback()  # Call the registered callback
+                # callbacks_to_remove.append((threshold, callback))  # Mark for removal
+        
+        # # Remove the callbacks that were triggered
+        # for item in callbacks_to_remove:
+        #     if item in self.threshold_callbacks:
+        #         self.threshold_callbacks.remove(item)
 
 
 
